@@ -9,6 +9,9 @@ in_file = open("IP_input.log")
 ## Set output file
 out_file = "GeoIP.csv"
 
+
+######SET FUNCTIONS######
+
 ## Open a file to write to and set column headers
 def set_header():
     write_file = open(out_file,'a+',encoding="utf-8")
@@ -60,13 +63,17 @@ def get_ip():
         ## Writes to file if ip is over 5 characters in length - basic error check to avoid blanks
         if len(ip_string) > 5 :
             ## uncomment to view current IP thats being worked on
-            #print (ip_string)
+            print (ip_string + " Being checked...")
 
             ##get the JSON data from api
             json_dump = geo_ip(ip_string)
 
             ## open file to write to - ensure there is encoding to avoid character errors
             write_file = open(out_file,'a+',encoding="utf-8")
+
+            if json_dump['query'] in open(out_file,encoding="utf-8").read():
+                print (json_dump['query']+" already checked [DUPLICATE]")
+                continue
 
             ##write data to file each , starts a new comment
             write_file.write(str(counter))
@@ -147,11 +154,19 @@ def format_csv_cell(item):
     item_formatter = str(item)
     item_formatter = item_formatter.replace(",", "")
     return item_formatter
-    
-##run the functions
-set_header()
 
-##delay after setting header to avoid the header being missed
-time.sleep(2)
 
+######RUN FUNCTIONS######
+
+##test if file exists
+try:
+    testfile = open(out_file)
+    testfile.close()
+except IOError:
+    ##if file doesnt exist set headers
+    set_header()
+    ##delay after setting header to avoid the header being missed
+    time.sleep(2)
+##if file does exist - go to next function
+  
 get_ip()
